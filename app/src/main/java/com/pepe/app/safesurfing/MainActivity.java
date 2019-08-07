@@ -1,33 +1,141 @@
 package com.pepe.app.safesurfing;
 
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    @VisibleForTesting
+    public ProgressDialog mProgressDialog;
+    private static final String TAG = "MainActivity";
+    // [END declare_auth]
+
+    private GoogleApiClient mGoogleApiClient;
+    private TextView mStatusTextView;
+    private TextView mDetailTextView;
+
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private static FirebaseAuth mAuth;
+    private static FirebaseDatabase database;
+    private FirebaseUser currentUser = null;
+    private static final int RC_SIGN_IN = 9001;
+    private static boolean LOG_IN = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //java.text.DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
         super.onCreate(savedInstanceState);
+        FirebaseApp.initializeApp(this);
+       // GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        //        .requestEmail()
+         //       .build();
         setContentView(R.layout.activity_main);
+
+
+        loadActivity();
+
+
+        database = FirebaseDatabase.getInstance();
+
+
+
+        currentUser = mAuth.getCurrentUser();
+        if( mAuth.getCurrentUser()==null){
+            singInOut(currentUser);
+            currentUser = mAuth.getCurrentUser();
+
+            updateUI(currentUser);
+            Log.d(TAG, "PEPITO1: isNull"+currentUser);
+        }else {
+            Log.v("mAuth", mAuth.getCurrentUser().getEmail());
+            Toast.makeText(this, mAuth.getCurrentUser().getEmail(),
+                    Toast.LENGTH_SHORT).show();
+            currentUser = mAuth.getCurrentUser();
+            updateUI(currentUser);
+            Log.d(TAG, "PEPITO2: isNull"+currentUser);
+
+        }
+
+
+
+
+    }
+
+    private void loadActivity() {
+
+        // Views
+        mStatusTextView = (TextView) findViewById(R.id.status);
+        mDetailTextView = (TextView) findViewById(R.id.detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        //sing in
+
+        Log.d(TAG, "PEPITO1: ONCREATE"+currentUser);
+
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    MenuItem menu = (MenuItem) findViewById(R.id.action_settings);
+                    if(menu!=null)
+                    menu.setTitle(R.string.action_settings);
+                    updateUI(user);
+                    LOG_IN=true;
+                    DatabaseReference myRef = database.getReference("surfista");
+                    myRef.setValue(user.getDisplayName());
+                    Log.d(TAG, "PEPITO onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    MenuItem menu = (MenuItem) findViewById(R.id.action_settings);
+                    if(menu!=null)
+                    menu.setTitle(R.string.action_settings_in);
+                    LOG_IN=false;
+
+                    Log.d(TAG, "PEPITO onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -46,6 +154,10 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Log.d(TAG, "PEPITO3: isNull"+currentUser);
+        mAuth = FirebaseAuth.getInstance();
+
     }
 
     @Override
@@ -71,14 +183,69 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            if(item.getTitle().equals(getString(R.string.action_settings))) {
+                item.setTitle(R.string.action_settings_in);
+                singInOut(currentUser);
+            }
+            else{
+                item.setTitle(R.string.action_settings);
+                singInOut(currentUser);
+            }
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        mAuth = FirebaseAuth.getInstance(FirebaseApp.getInstance());
+        currentUser=mAuth.getCurrentUser();
+        updateUI(currentUser);
+        Log.d(TAG, "PEPITO4: onSTART"+currentUser);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mAuth.addAuthStateListener(mAuthListener);
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+
+       /* if(currentUser==null) {
+            Intent blankIntent = new Intent(this, blankActivity.class);
+            startActivity(blankIntent);
+        }*/
+        currentUser = mAuth.getCurrentUser();
+        updateUI(currentUser);
+        Log.d(TAG, "PEPITO1: OnRESUMEN"+currentUser);
+    }
+
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        //loadActivity();
+
+       // mAuth = FirebaseAuth.getInstance(FirebaseApp.getInstance());
+
+       // currentUser = mAuth.getCurrentUser();
+       // updateUI(currentUser);
+
+        Log.d(TAG, "PEPITO1: onRESTARTa"+currentUser);
+    }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -106,35 +273,60 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void abrirNavegacion(View view){
-        Intent intent = new Intent(this, Navegacion.class);
+       // Intent intent = new Intent(this, Navegacion.class);
 
-        startActivity(intent);
+      //  if(LOG_IN)
+           // startActivityForResult(intent, RC_SIGN_IN);
+       // else
+            Toast.makeText(this, "Debe loguearse antes de acceder a la navegación",
+                    Toast.LENGTH_SHORT).show();
+
     }
 
-    public void abrirMonitor(View view){
-        Intent intent = new Intent(this, Monitorizacion.class);
+    public void singInOut(FirebaseUser user){
+        Intent intent = new Intent(this, GoogleSignInActivity.class);
+        Log.d(TAG, "PEPITO1: lanza intent google sign "+currentUser);
+        intent.putExtra("USER", user!=null?user.getEmail():"");
         //checkPlayServices();
         startActivity(intent);
     }
+    public void abrirMonitor(View view){
+        Intent intent = new Intent(this, Monitorizacion.class);
+        //checkPlayServices();
+        if(LOG_IN)
+        startActivity(intent);
+        else
+            Toast.makeText(this, "Debe loguearse antes de acceder al Monitor",
+                    Toast.LENGTH_SHORT).show();
+    }
+    private void updateUI(FirebaseUser user) {
+        hideProgressDialog();
+        if (user != null) {
+            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
+            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
 
-    private boolean checkPlayServices() {
-        try {
-            int resultCode = GooglePlayServicesUtil
-                    .isGooglePlayServicesAvailable(this);
-            if (resultCode != ConnectionResult.SUCCESS) {
-                if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                    GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                            GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE).show();
 
-                } else {
-                    Log.i("GPS", "This device is not supported.");
+        } else {
+            mStatusTextView.setText(R.string.signed_out);
+            mDetailTextView.setText(null);
 
-                }
-                return false;
-            }
-        }catch (Exception e){
-            Log.v("GPS", "GPS THROW");
+
         }
-        return true;
+    }
+
+    public void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.loading));
+            mProgressDialog.setIndeterminate(true);
+        }
+
+        mProgressDialog.show();
+    }
+
+    public void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
     }
 }

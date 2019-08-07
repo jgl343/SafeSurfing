@@ -5,5 +5,5 @@ package com.pepe.app.safesurfing;
  */
 public interface GetterAemetURI {
 
-    public String getAemetURI(String provincia, String municipio);
+    String getAemetURI(String provincia, String municipio);
 }
