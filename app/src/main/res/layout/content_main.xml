@@ -11,42 +11,74 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.pepe.app.safesurfing.MainActivity"
     tools:showIn="@layout/app_bar_main">
-<LinearLayout
-    android:layout_width="wrap_content"
 
-    android:layout_height="wrap_content"
-    android:layout_weight="3"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    >
-    <TextView
-        android:id="@+id/status"
-        style="@style/ThemeOverlay.MyTextDetail"
-        android:text="@string/signed_out" />
-    <TextView
-        android:id="@+id/detail"
-        style="@style/ThemeOverlay.MyTextDetail"
-        tools:text="Firebase User ID: 123456789abc" />
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/layoutLabel"
+        android:layout_width="386dp"
+        android:layout_height="181dp"
+        android:layout_weight="3"
+        android:gravity="center_horizontal|left"
+        android:orientation="vertical">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Modo Navegación"
-        android:id="@+id/BT_NAVEGACION"
-        android:layout_marginTop="114dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:clickable="true"
-        android:onClick="abrirNavegacion" />
+        <TextView
+            android:id="@+id/status"
+            style="@style/ThemeOverlay.MyTextDetail"
+            android:text="@string/signed_out" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Modo Monitor"
-        android:id="@+id/BT_MONITOR"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:clickable="true"
-        android:onClick="abrirMonitor" />
+
+        <TextView
+            android:id="@+id/detail"
+            style="@style/ThemeOverlay.MyTextDetail"
+            tools:text="Firebase User ID: 123456789abc" />
+
+        <TextView
+            android:id="@+id/dirWind"
+            style="@style/ThemeOverlay.MyTextDetail"
+            tools:text="Direccion del viento" />
+
+        <TextView
+            android:id="@+id/ciudad"
+            style="@style/ThemeOverlay.MyTextDetail"
+            tools:text="Ciudad:" />
+
+        <TextView
+            android:id="@+id/longitud"
+            style="@style/ThemeOverlay.MyTextDetail"
+            tools:text="Longitud:" />
+
+        <TextView
+            android:id="@+id/latitud"
+            style="@style/ThemeOverlay.MyTextDetail"
+            tools:text="Latitud:" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="389dp"
+        android:layout_height="433dp"
+        android:layout_below="@+id/layoutLabel"
+        android:layout_weight="3"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/BT_NAVEGACION"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:onClick="abrirNavegacion"
+            android:text="Modo Navegación" />
+
+        <Button
+            android:id="@+id/BT_MONITOR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:onClick="abrirMonitor"
+            android:text="Modo Monitor" />
+    </LinearLayout>
+
 </RelativeLayout>
