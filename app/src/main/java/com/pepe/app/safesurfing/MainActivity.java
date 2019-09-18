@@ -345,14 +345,20 @@ public class MainActivity extends AppCompatActivity
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
-            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
+            Weather.getInstance().setUsuario(user.getEmail());
+            mStatusTextView.setText(getString(R.string.google_status_fmt,user.getEmail() ));
            //mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
             mDetailTextView.setText(getString(R.string.firebase_status_fmt, Weather.getInstance().getWind()));
 
             mCiudadTextView.setText(getString(R.string.label_ciudad, Weather.getInstance().getCiudad()));
             mDirWindTextView.setText(getString(R.string.label_dirwind, Weather.getInstance().getWindDirection()));
-            mLatitudTextView.setText(getString(R.string.label_latitud, Weather.getInstance().getLatitud()));
-            mLongitudTextView.setText(getString(R.string.label_longitud, Weather.getInstance().getLatitud()));
+            if(!Weather.getInstance().getCiudad().isEmpty()) {
+                mLatitudTextView.setText(getString(R.string.label_latitud, Weather.getInstance().getLatitud()));
+                mLongitudTextView.setText(getString(R.string.label_longitud, Weather.getInstance().getLongitud()));
+            }else{
+                mLatitudTextView.setText(getString(R.string.label_latitud, 0.0));
+                mLongitudTextView.setText(getString(R.string.label_longitud, 0.0));
+            }
 
 
         } else {

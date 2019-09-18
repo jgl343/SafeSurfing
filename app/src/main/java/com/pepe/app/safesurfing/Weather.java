@@ -12,6 +12,7 @@ public class Weather {
 
     private Weather() {
     }
+    private String usuario ="";
     private String ciudad ="";
     private String x="";
     private String y="";
@@ -19,10 +20,17 @@ public class Weather {
     private double longitud=-2.407005;
     private double speed=0;
     private String windDirection="";
+    private String direction="";
+
     private int id=0;
     private double wind=0;
     private Date fecha = new Date();
-
+    public String getUsuario() {
+        return usuario;
+    }
+    public void setUsuario(String usuario){
+        this.usuario=usuario;
+    }
     public String getCiudad() {
         return ciudad;
     }
@@ -71,7 +79,12 @@ public class Weather {
     public void setLongitud(double longitud){
         this.longitud=longitud;
     }
-
+    public String getDirection() {
+        return direction;
+    }
+    public void setDirection(String direction){
+        this.direction=direction;
+    }
     public Date getFecha() {
         return fecha;
     }

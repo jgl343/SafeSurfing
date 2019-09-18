@@ -94,9 +94,12 @@ public class WeatherActivity extends AppCompatActivity {
         catch (Throwable t) {
             t.printStackTrace();
         }
+
     }
 
-
-
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        super.onBackPressed();
+    }
 }

@@ -25,7 +25,16 @@ public class Monitorizacion extends FragmentActivity implements OnMapReadyCallba
         mapFragment.getMapAsync(this);
     }
 
+    private void moveToCurrentLocation(LatLng currentLocation)
+    {
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,15));
+        // Zoom in, animating the camera.
+        mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        // Zoom out to zoom level 10, animating with a duration of 2 seconds.
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
 
+
+    }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -38,6 +47,11 @@ public class Monitorizacion extends FragmentActivity implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        LatLng posAuxilio = new LatLng( Weather.getInstance().getLatitud(), Weather.getInstance().getLongitud());
+        mMap.addMarker(new MarkerOptions()
+                    .position(posAuxilio)
+                    .title( Weather.getInstance().getUsuario()));
+        moveToCurrentLocation(posAuxilio);
 
 
     }

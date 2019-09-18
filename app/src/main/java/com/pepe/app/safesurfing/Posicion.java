@@ -2,9 +2,6 @@ package com.pepe.app.safesurfing;
 
 import java.util.Date;
 
-/**
- * Created by Pepe y Rocio on 05/07/2017.
- */
 
 public class Posicion {
 

@@ -72,6 +72,41 @@ public  class UploadPositionWorker extends ListenableWorker {
                               Weather.getInstance().setLatitud(location.getAltitude());
                               Weather.getInstance().setSpeed(location.getSpeedAccuracyMetersPerSecond());
 
+                              Float currentWindDir = location.getBearing();
+                              int windDirInt=0;
+                              if(currentWindDir!=null&&!currentWindDir.isNaN()) {
+                                  windDirInt = Integer.valueOf(String.valueOf(currentWindDir).substring(0,String.valueOf(currentWindDir).indexOf(".")))%360;
+                              }
+                              int numDirection = windDirInt/45;
+                              String direction ="N";
+                              switch(numDirection){
+                                  case 0:
+                                      direction="E";
+                                      break;
+                                  case 1:
+                                      direction="NE";
+                                      break;
+                                  case 2:
+                                      direction="N";
+                                      break;
+                                  case 3:
+                                      direction="NO";
+                                      break;
+                                  case 4:
+                                      direction="O";
+                                      break;
+                                  case 5:
+                                      direction="SO";
+                                      break;
+                                  case 6:
+                                      direction="S";
+                                      break;
+                                  case 7:
+                                      direction="SE";
+                                      break;
+                              }
+                              Weather.getInstance().setDirection(direction);
+
                               latitud = Double.toString(location.getLatitude());
                               longitud = Double.toString(location.getLongitude());
                               altitud = Double.toString(location.getAltitude());
