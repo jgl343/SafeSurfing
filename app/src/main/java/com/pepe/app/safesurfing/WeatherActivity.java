@@ -1,7 +1,9 @@
 package com.pepe.app.safesurfing;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -76,6 +78,7 @@ public class WeatherActivity extends AppCompatActivity {
                     Weather.getInstance().setCiudad(currentWeather.weather.location.getCity());
 
                     Log.d("PEPEWL", "City ["+currentWeather.weather.location.getCity()+"] Current temp ["+currentTemp+"]"+" Current tWind ["+currentWind+"]"+" Current tWind ["+windDirStr+"]");
+                    finish();
                 }
 
                 @Override
@@ -88,6 +91,7 @@ public class WeatherActivity extends AppCompatActivity {
                 public void onConnectionError(Throwable throwable) {
                     Log.d("PEPEWL", "Connection error");
                     throwable.printStackTrace();
+                    finish();
                 }
             });
         }
@@ -100,6 +104,8 @@ public class WeatherActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        super.onBackPressed();
+
     }
+
+
 }

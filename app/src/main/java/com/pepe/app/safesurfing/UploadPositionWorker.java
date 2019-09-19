@@ -7,7 +7,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.ListenableWorker;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -15,8 +18,12 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-public  class UploadPositionWorker extends ListenableWorker {
+import java.util.concurrent.TimeUnit;
+
+public  class UploadPositionWorker extends ListenableWorker  {
     private FusedLocationProviderClient fusedLocationClient;
 
     private Context context;
@@ -29,13 +36,12 @@ public  class UploadPositionWorker extends ListenableWorker {
     private Context mContext;
     private String latitud="";
     private String longitud="";
-    private String altitud="";
-
+    private double altitud = 1.0;
+    private FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
 
     public UploadPositionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context=context;
-        this.workerParams=workerParams;
+
     }
 
     @NonNull
@@ -66,11 +72,7 @@ public  class UploadPositionWorker extends ListenableWorker {
                       public void onSuccess(Location location) {
                           // Got last known location. In some rare situations this can be null.
                           if (location != null) {
-                              // Logic to handle location object
-                              Weather.getInstance().setLatitud(location.getLatitude());
-                              Weather.getInstance().setLatitud(location.getLongitude());
-                              Weather.getInstance().setLatitud(location.getAltitude());
-                              Weather.getInstance().setSpeed(location.getSpeedAccuracyMetersPerSecond());
+
 
                               Float currentWindDir = location.getBearing();
                               int windDirInt=0;
@@ -81,35 +83,51 @@ public  class UploadPositionWorker extends ListenableWorker {
                               String direction ="N";
                               switch(numDirection){
                                   case 0:
-                                      direction="E";
-                                      break;
-                                  case 1:
-                                      direction="NE";
-                                      break;
-                                  case 2:
-                                      direction="N";
-                                      break;
-                                  case 3:
-                                      direction="NO";
-                                      break;
-                                  case 4:
                                       direction="O";
                                       break;
-                                  case 5:
+                                  case 1:
                                       direction="SO";
                                       break;
-                                  case 6:
+                                  case 2:
                                       direction="S";
                                       break;
-                                  case 7:
+                                  case 3:
                                       direction="SE";
+                                      break;
+                                  case 4:
+                                      direction="E";
+                                      break;
+                                  case 5:
+                                      direction="NE";
+                                      break;
+                                  case 6:
+                                      direction="N";
+                                      break;
+                                  case 7:
+                                      direction="NO";
                                       break;
                               }
                               Weather.getInstance().setDirection(direction);
 
                               latitud = Double.toString(location.getLatitude());
                               longitud = Double.toString(location.getLongitude());
-                              altitud = Double.toString(location.getAltitude());
+                              altitud = location.getAltitude();
+                                boolean reencolarTarea = true;
+                              if(altitud==0){  //comprobamos que estamos en el agua
+                                  double umbralVelocidad= location.getSpeedAccuracyMetersPerSecond()*0.7;
+                                  if(Weather.getInstance().getWind()<umbralVelocidad*1.20){ //comprobamos que cumplimos el umbral
+                                      if(direction.equals(Weather.getInstance().getWindDirection())){ //comprobamos que no vamos en contra del viento
+                                          DatabaseReference mDatabaseReference = mDatabase.getReference();
+                                          mDatabaseReference = mDatabase.getReference().child("navegante");
+                                          mDatabaseReference.setValue(Weather.getInstance());
+                                          reencolarTarea=false;
+                                      }
+                                  }
+                              }
+                                if(reencolarTarea){
+                                    OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(UploadPositionWorker.class).setInitialDelay(5, TimeUnit.MINUTES).build();
+                                    WorkManager.getInstance().enqueueUniqueWork(UploadPositionWorker.UNIQUE_WORK_NAME, ExistingWorkPolicy.KEEP, request);
+                                }
                               Log.d("location", "PEPITO1: latitud: " + latitud + " - longitud: " + longitud + " - altitud: " + altitud);
                           }
 

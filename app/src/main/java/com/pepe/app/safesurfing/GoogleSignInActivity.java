@@ -188,20 +188,7 @@ public class GoogleSignInActivity extends BaseActivity implements
             Log.d(TAG, " PEPITO handleSignInResult : catch");
             updateUI(null);
         }
-        /*GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
-        if (result.isSuccess()) {
-            // Google Sign In was successful, authenticate with Firebase
-
-            GoogleSignInAccount account = result.getSignInAccount();
-
-
-        } else {
-            // Google Sign In failed, update UI appropriately
-            // [START_EXCLUDE]
-            updateUI(null);
-            // [END_EXCLUDE]
-        }*/
     }
     // [END onactivityresult]
 
@@ -278,7 +265,6 @@ public class GoogleSignInActivity extends BaseActivity implements
         hideProgressDialog();
         if (user != null) {
             mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
 
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);

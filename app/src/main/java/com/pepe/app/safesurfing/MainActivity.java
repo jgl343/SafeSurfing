@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 0;
+    private static final int RC_LOCATION_IN = 1;
     @VisibleForTesting
     public ProgressDialog mProgressDialog;
     private static final String TAG = "MainActivity";
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity
     private static FirebaseDatabase database;
     private FirebaseUser currentUser = null;
     private static final int RC_SIGN_IN = 9001;
+    private static final int RC_WEATHER_IN = 1;
     private static boolean LOG_IN = false;
 
     @Override
@@ -269,10 +271,12 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             Intent intent = new Intent(this, WeatherActivity.class);
-
+            //startActivityForResult(intent,RC_WEATHER_IN );
             startActivity(intent);
         } else if (id == R.id.nav_gallery) {
-
+            Intent intent = new Intent(this, LocationActivity.class);
+            startActivity(intent);
+            //startActivityForResult(intent,RC_LOCATION_IN );
         } else if (id == R.id.nav_slideshow) {
             try {
                 Intent intent = new Intent(Intent.ACTION_CALL);
@@ -317,8 +321,13 @@ public class MainActivity extends AppCompatActivity
     public void abrirNavegacion(View view){
         Intent intent = new Intent(this, Navigation.class);
 
+
+
         if(LOG_IN) {
             startActivityForResult(intent, RC_SIGN_IN);
+        }else if(!Weather.getInstance().getDirection().isEmpty()){
+            Toast.makeText(this, "Debe consultar el tiempo antes de acceder a la navegación",
+                    Toast.LENGTH_SHORT).show();
         }else {
             Toast.makeText(this, "Debe loguearse antes de acceder a la navegación",
                     Toast.LENGTH_SHORT).show();

@@ -16,12 +16,11 @@ public class Weather {
     private String ciudad ="";
     private String x="";
     private String y="";
-    private double latitud=36.829191;
-    private double longitud=-2.407005;
+    private double latitud=36.830428;
+    private double longitud=-2.405592;
     private double speed=0;
     private String windDirection="";
     private String direction="";
-
     private int id=0;
     private double wind=0;
     private Date fecha = new Date();
