@@ -53,7 +53,9 @@ public class Navigation extends AppCompatActivity {
         getWindow().setAttributes(params);
 
         DatabaseReference mDatabaseReference = mDatabase.getReference();
-        mDatabaseReference = mDatabase.getReference().child("navegante");
+        Long tsLong = System.currentTimeMillis()/1000;
+        String ts = tsLong.toString();
+        mDatabaseReference = mDatabase.getReference().child("navegante-"+ts);
         mDatabaseReference.setValue(Weather.getInstance());
 
     }
